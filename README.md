@@ -1,1 +1,1 @@
-# merkl-multi-address-dashboard
+Personal experiment. Multi-address Merkl rewards viewer.
