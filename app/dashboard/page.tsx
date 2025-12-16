@@ -13,8 +13,10 @@ interface Chain {
 
 interface RewardItem {
     tokenSymbol: string;
-    claimable: string;
-    pending: string;
+    claimable: bigint;
+    pending: bigint;
+    decimals: number;
+    price?: number;
 }
 
 interface ChainRewards {
@@ -59,8 +61,10 @@ export default function DashboardPage() {
 
                     return {
                         tokenSymbol: reward.token.symbol,
-                        claimable: (Number(claimable) / Math.pow(10, decimals)).toFixed(4),
-                        pending: (Number(pending) / Math.pow(10, decimals)).toFixed(4)
+                        claimable: claimable,
+                        pending: pending,
+                        decimals: decimals,
+                        price: reward.token.price
                     };
                 });
 

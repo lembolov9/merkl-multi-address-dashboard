@@ -2,8 +2,10 @@ import ChainRewards from './ChainRewards';
 
 interface RewardItem {
     tokenSymbol: string;
-    claimable: string;
-    pending: string;
+    claimable: bigint;
+    pending: bigint;
+    decimals: number;
+    price?: number;
 }
 
 interface ChainRewardsData {
@@ -30,9 +32,9 @@ export default function RewardsDisplay({ addressRewards, showOnlyClaimable }: Re
                             return chainRewards;
                         }
 
-                        // Filter out rewards with claimable === '0.0000'
+                        // Filter out rewards with claimable === 0
                         const filteredRewards = chainRewards.rewards.filter(
-                            (reward) => parseFloat(reward.claimable) > 0
+                            (reward) => reward.claimable > 0n
                         );
 
                         return {
