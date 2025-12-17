@@ -12,9 +12,10 @@ interface ChainRewardsProps {
     chainName: string;
     chainId: number;
     rewards: RewardItem[];
+    totalUSD: number;
 }
 
-export default function ChainRewards({ chainName, chainId, rewards }: ChainRewardsProps) {
+export default function ChainRewards({ chainName, chainId, rewards, totalUSD }: ChainRewardsProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Helper to format BigInt amount to string with 4 decimals
@@ -32,15 +33,7 @@ export default function ChainRewards({ chainName, chainId, rewards }: ChainRewar
         return `${integerPart}.${fractionalStr}`;
     };
 
-    // Calculate total claimable USD value
-    const totalUSD = rewards.reduce((acc, reward) => {
-        if (reward.price && reward.claimable > 0n) {
-            const amountFloat = Number(reward.claimable) / Math.pow(10, reward.decimals);
-            return acc + (amountFloat * reward.price);
-        }
-        return acc;
-    }, 0);
-
+    // Format the totalUSD received from props
     const formattedTotalUSD = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

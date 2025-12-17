@@ -12,6 +12,7 @@ interface ChainRewardsData {
     chainName: string;
     chainId: number;
     rewards: RewardItem[];
+    totalUSD?: number;
 }
 
 interface RewardsDisplayProps {
@@ -28,21 +29,33 @@ export default function RewardsDisplay({ addressRewards, showOnlyClaimable }: Re
                 // Filter chains and rewards based on showOnlyClaimable flag
                 const filteredChains = chainRewardsList
                     .map((chainRewards) => {
-                        if (!showOnlyClaimable) {
-                            return chainRewards;
+                        let rewardsToProcess = chainRewards.rewards;
+
+                        if (showOnlyClaimable) {
+                            // Filter out rewards with claimable === 0
+                            rewardsToProcess = chainRewards.rewards.filter(
+                                (reward) => reward.claimable > 0n
+                            );
                         }
 
-                        // Filter out rewards with claimable === 0
-                        const filteredRewards = chainRewards.rewards.filter(
-                            (reward) => reward.claimable > 0n
-                        );
+                        // Calculate total claimable USD value for this chain
+                        const totalUSD = rewardsToProcess.reduce((acc, reward) => {
+                            if (reward.price && reward.claimable > 0n) {
+                                const amountFloat = Number(reward.claimable) / Math.pow(10, reward.decimals);
+                                return acc + (amountFloat * reward.price);
+                            }
+                            return acc;
+                        }, 0);
 
                         return {
                             ...chainRewards,
-                            rewards: filteredRewards
+                            rewards: rewardsToProcess,
+                            totalUSD
                         };
                     })
-                    .filter((chainRewards) => chainRewards.rewards.length > 0);
+                    .filter((chainRewards) => chainRewards.rewards.length > 0)
+                    // Sort chains by totalUSD in descending order
+                    .sort((a, b) => b.totalUSD - a.totalUSD);
 
                 // If no chains have rewards after filtering, don't render this address
                 if (filteredChains.length === 0) {
@@ -75,6 +88,7 @@ export default function RewardsDisplay({ addressRewards, showOnlyClaimable }: Re
                                 chainName={chainRewards.chainName}
                                 chainId={chainRewards.chainId}
                                 rewards={chainRewards.rewards}
+                                totalUSD={chainRewards.totalUSD ?? 0}
                             />
                         ))}
                     </div>
